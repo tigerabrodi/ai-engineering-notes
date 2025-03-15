@@ -17,6 +17,29 @@ The model "encodes" these patterns by:
 2. **Storing these patterns in model parameters** (weights in the neural network)
 3. **Creating a statistical map** of how language works
 
+## What is entropy?
+
+### What Entropy Means in Language Models
+
+Entropy measures the **unpredictability or randomness** in a system. In language modeling:
+
+- **Low entropy** = high predictability (like "The capital of France is \_\_\_" where "Paris" is highly predictable)
+- **High entropy** = low predictability (like "My favorite thing is \_\_\_" where many answers are possible)
+
+Mathematically, entropy is the average number of "bits" needed to represent an event drawn from a probability distribution.
+
+### Why It's Still Used Today
+
+We still use entropy (and related concepts) in modern AI for several reasons:
+
+1. **Training objective**: Cross-entropy loss is the standard loss function for training language models
+
+2. **Evaluation metric**: Perplexity (which is derived from entropy - it measures how "confused" or "surprised" the model is when it encounters text) remains a standard way to evaluate how well a model predicts text
+
+3. **Theoretical foundation**: Even as architectures evolved from simple statistical models to complex transformers, the underlying goal remains modeling probability distributions of language - which entropy directly measures
+
+4. **Efficiency measure**: Bits-per-character/token metrics help us compare how efficiently different models compress information
+
 ## Tokenization in Language Models
 
 ### Basic Concepts
@@ -101,3 +124,40 @@ The model "encodes" these patterns by:
 - Simple completion isn't the same as engaging in conversation
 - A completion machine might respond to a question by adding another question
 - "Post-Training" discusses making models respond appropriately to user requests
+
+## Supervised vs. Self-Supervised Learning
+
+### Supervised Learning
+
+- **Definition**: Training models using data that humans have manually labeled
+- **How it works**: Humans examine each example and assign the correct answer/category
+- **Examples**:
+  - Images labeled as "cat," "dog," etc.
+  - Transactions marked as "fraud" or "not fraud"
+- **Cost factors**:
+  - Paying humans to create labels (~$0.05 per image)
+  - Multiple labelers for quality control (doubles/triples cost)
+  - Example: $50,000 to label 1 million images for ImageNet
+- **Limitations**:
+  - Expensive as dataset size grows
+  - Cannot scale beyond human labeling capacity
+  - Some domains require rare, expensive expertise
+
+### Self-Supervised Learning
+
+- **Definition**: Models learn from patterns in the data itself without human labels
+- **How it works**: The data contains its own supervision signal
+- **Example**: In "I love street food"
+  - Input: "<BOS>, I, love, street" → Output: "food"
+  - Each word provides context to predict the next
+- **Advantages**:
+  - No human labeling costs
+  - Can use virtually unlimited data (books, articles, websites)
+  - Scales without additional human intervention
+- **Key insight**: Text naturally contains its own supervision, unlocking massive scalability
+
+### Why This Distinction Matters
+
+- Self-supervision enabled the "ChatGPT moment" by removing the data labeling bottleneck
+- Language models could train on trillions of words instead of millions of labeled examples
+- This is why language AI scaled faster than other AI domains
