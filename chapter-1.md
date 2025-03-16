@@ -161,3 +161,60 @@ We still use entropy (and related concepts) in modern AI for several reasons:
 - Self-supervision enabled the "ChatGPT moment" by removing the data labeling bottleneck
 - Language models could train on trillions of words instead of millions of labeled examples
 - This is why language AI scaled faster than other AI domains
+
+# Planning AI applications
+
+## Things to measure
+
+- Inference cost
+- Time to first token, time per output token, total latency
+- are users really happy with the output?
+
+## Inference Cost Cheat Sheet
+
+### **What is Inference?**
+
+- **Analogy**: Like a serverless function (e.g., AWS Lambda) running for every API request.
+- **What you pay for**:
+  - **GPU/CPU time**: How long the AI "thinks" per request.
+  - **RAM**: How much memory the model needs (bigger model = more $$$).
+  - **Throughput**: Users hitting your AI endpoint at once (scaling costs).
+
+---
+
+### **Key Cost Drivers**
+
+| Factor               | Web Dev Analogy                     | Cost Impact Example                              |
+| -------------------- | ----------------------------------- | ------------------------------------------------ |
+| **Model Size**       | Next.js vs. Express.js              | GPT-4: $0.03/1k tokens → $150/mo                 |
+|                      | (Heavier framework = slower dev)    | Llama 2: $0.0004/1k → $2/mo                      |
+| **Hardware**         | Cheap CPU vs. High-end GPU server   | GPU speeds up responses but costs more per hour. |
+| **Concurrent Users** | Scaling from 10 to 10k API requests | More users → More GPUs needed → $$$.             |
+
+---
+
+### **Optimization Hacks**
+
+_(Like tuning your Express.js API)_
+
+1. **Cache common responses** (e.g., FAQ answers).
+2. **Batch requests** (process 100 user prompts at once).
+3. **Use smaller models** (Llama 2 > GPT-4 for simple tasks).
+4. **Serverless GPUs** (AWS Lambda for AI → pay per request).
+
+---
+
+### **Real-World Example**
+
+**Scenario**: 10k users, 5 requests/day each (~500 tokens/request):
+
+- **GPT-4**: `10k * 5 * 500 * $0.03 / 1k = $750/mo`
+- **Llama 2**: Same usage → `$2/mo`  
+  _Why?_ GPT-4 is like a Lamborghini; Llama 2 is a Toyota.
+
+---
+
+### **Red Flags**
+
+- Using GPT-4 for "Hello World" tasks → paying for a race car to drive 5 mph.
+- Not monitoring token usage → surprise $10k bill (like Heroku free tier gone viral).
