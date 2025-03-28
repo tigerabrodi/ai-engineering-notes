@@ -218,3 +218,46 @@ _(Like tuning your Express.js API)_
 
 - Using GPT-4 for "Hello World" tasks → paying for a race car to drive 5 mph.
 - Not monitoring token usage → surprise $10k bill (like Heroku free tier gone viral).
+
+## Fine tuning notes
+
+**What is Fine-Tuning?**  
+Fine-tuning means taking a pre-trained AI model (like BERT) and training it a bit more on your own data to make it good at a specific job. BERT already knows basic language from books and websites, but it doesn’t know your task (like spotting positive/negative reviews).
+
+**Why Use BERT?**  
+BERT is good at understanding context. For example, it knows “bank” can mean a riverbank or a place to save money. This helps it handle tasks like text classification (sorting text into groups) or sentiment analysis (finding positive/negative opinions).
+
+**What is a Labeled Dataset?**  
+A labeled dataset has examples where each piece of text is paired with the right answer. For sentiment analysis, this could be:
+
+- _“This movie was amazing!” → Positive_
+- _“Worst service ever.” → Negative_
+
+You can find free labeled datasets on Hugging Face or Kaggle.
+
+**How Does Fine-Tuning Work?**
+
+1. **Modify the Model**: Replace BERT’s last layer so it matches your task (e.g., two outputs for positive/negative).
+2. **Freeze Layers**: Keep most of BERT’s original knowledge intact by only training the new parts.
+3. **Train Slowly**: Use a small learning rate (like 2e-5) and train for 3-5 rounds to avoid wrecking BERT’s existing skills.
+4. **Test**: Check if the model works on new, unseen data (your test set).
+
+**What is Text Classification?**  
+Text classification means sorting text into categories. Examples:
+
+- **Sentiment Analysis**: Positive vs. negative reviews.
+- **Spam Detection**: Spam vs. not spam emails.
+- **Topic Labeling**: News articles as “Sports” or “Politics”.
+
+**Common Mistakes**
+
+- **Overfitting**: The model memorizes your data but fails on new examples. Fix this by training less or adding more data.
+- **Wrong Task**: Don’t fine-tune BERT for something totally unrelated (like image generation). Stick to text tasks.
+
+**Final Goal**  
+Turn BERT into a custom tool for your task. For example:
+
+- A sentiment analysis model that tags tweets as positive/negative.
+- A spam filter that blocks junk emails.
+
+Keep it simple. Start small. Test often.
