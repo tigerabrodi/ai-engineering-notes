@@ -52,7 +52,7 @@ Lower perplexity = better model. It's easier to interpret than cross entropy.
 - For general conversational AI: Look for perplexity under 30
 - For specialized domains: You might need fine-tuning if perplexity is over 100
 
-# Practical Tips for Your Work
+# Practical Tips for Work as a fullstack dev
 
 **For model selection**:
 
@@ -102,3 +102,105 @@ Think of it this way:
 They share the word "entropy" because they're related concepts from information theory. Cross entropy builds on entropy - it's essentially measuring how much additional uncertainty (or "entropy") is added when using an imperfect model's predictions instead of the true probabilities.
 
 When you're building AI applications, you'll mostly care about cross entropy and perplexity since they tell you about model performance. Entropy is more about understanding the inherent complexity of your text data.
+
+# Exact evaluation
+
+## Functional correctness
+
+Functional correctness is one of the most straightforward evaluation approaches. It essentially asks: "Did the model do exactly what it was supposed to do?"
+
+For example:
+
+- If you asked a model to generate Python code to sort a list, does the code actually run and correctly sort the list?
+- If you asked a model to extract specific data points from text, did it extract all the correct values?
+- If you asked for a summary containing 5 key points, did it actually include all 5 required points?
+
+The benefit of functional correctness evaluation is that it's binary and objective - the output either meets the specified requirements or it doesn't. This makes it particularly useful for tasks with clear right/wrong answers.
+
+This type of evaluation is crucial for AI engineering because it helps you:
+
+1. Compare different models objectively
+2. Track improvements over time
+3. Set quality thresholds for production systems
+4. Identify specific failure modes to address
+
+# Similarity Measurements
+
+## 1. Exact Match
+
+**What it is:** The strictest form of comparison where the model output must match the reference precisely.
+
+**When to use:**
+
+- Tasks with only one correct answer (math, specific data extraction)
+- When format and accuracy are critical (code generation, database queries)
+
+**Pros:** Simple to implement, unambiguous results  
+**Cons:** Inflexible - slight variations count as failures
+
+## 2. Lexical Similarity
+
+**What it is:** Measures word/character overlap between model output and reference.
+
+**Key metrics:**
+
+- **BLEU:** Measures n-gram precision (how many n-grams in the output appear in the reference)
+- **ROUGE:** Measures n-gram recall (how many n-grams in the reference appear in the output)
+- **F1 Score:** Balances precision and recall for overall accuracy
+  - **Precision:** Of all items the model identified as correct, how many were actually correct?
+  - **Recall:** Of all the actually correct items, how many did the model identify?
+
+**N-grams explained:** Continuous sequences of n words or characters
+
+- 1-grams (unigrams): Individual words ("The", "quick", "brown", "fox")
+- 2-grams (bigrams): Word pairs ("The quick", "quick brown", "brown fox")
+
+**Edit distance approaches:**
+
+- Levenshtein Distance: Counts minimum edits (insertions, deletions, substitutions) needed
+- Jaro-Winkler: Gives higher scores to strings that match from the beginning
+
+**When to use:**
+
+- Translation, summarization, text generation where wording patterns matter
+- When word choice and structure are important
+
+## 3. Semantic Similarity
+
+**What it is:** Measures similarity of meaning, regardless of specific words used.
+
+**How it works:**
+
+1. Convert texts to embeddings (numerical vectors representing meaning)
+2. Calculate distance between vectors in multi-dimensional space
+
+**Distance metrics:**
+
+- **Cosine Similarity:** Measures the angle between vectors
+  - Range: -1 to 1 (1 = identical meaning)
+  - Focuses on direction of meaning, not length of text
+  - Most common for text comparison
+- **Euclidean Distance:** Straight-line distance between points
+- **Dot Product:** Multiplication of corresponding values
+
+**When to use:**
+
+- Question answering, paraphrasing, content recommendation
+- When meaning matters more than exact wording
+- When responses could be correctly phrased in multiple ways
+
+## Key Differences Summarized
+
+- **Exact match** asks: "Are these identical?"
+- **Lexical similarity** asks: "How many words/phrases do these share?"
+- **Semantic similarity** asks: "Do these mean the same thing?"
+
+## Practical Applications
+
+Choose your evaluation method based on your requirements:
+
+- For code generation → Exact match or strict lexical similarity
+- For creative writing → Semantic similarity
+- For factual responses → Combination of lexical and semantic methods
+
+The more flexible the expected response format, the more you should lean toward semantic similarity for evaluation.
