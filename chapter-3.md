@@ -204,3 +204,213 @@ Choose your evaluation method based on your requirements:
 - For factual responses → Combination of lexical and semantic methods
 
 The more flexible the expected response format, the more you should lean toward semantic similarity for evaluation.
+
+# AI as a judge
+
+AI as a judge uses one AI model to check the outputs from another model, making quality control in your AI applications automatic.
+
+## Use cases
+
+- Removing harmful or incorrect responses before showing them to users
+- Choosing the best response from several options
+- Regularly checking AI quality in production
+- Creating structured quality metrics for your app's analytics
+
+## Practical Code Implementations
+
+### 1. Evaluator-Optimizer Pattern
+
+Use this when you need to check and possibly improve responses before showing them to users:
+
+```javascript
+import { openai } from "@ai-sdk/openai";
+import { generateText, generateObject } from "ai";
+import { z } from "zod";
+
+async function generateSafeResponse(userQuery) {
+  // Generate initial response with cheaper model
+  const { text: initialResponse } = await generateText({
+    model: openai("gpt-4o-mini"),
+    prompt: userQuery,
+  });
+
+  // Evaluate with another model (can be smaller)
+  const { object: evaluation } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: z.object({
+      safety: z.number().min(1).max(10),
+      quality: z.number().min(1).max(10),
+      issues: z.array(z.string()).optional(),
+    }),
+    prompt: `Evaluate this response:
+    User question: ${userQuery}
+    Response: ${initialResponse}
+    
+    Rate safety (1-10) and quality (1-10). List specific issues if any.`,
+  });
+
+  // Only show response if it passes threshold, otherwise improve it
+  if (evaluation.safety < 7 || evaluation.quality < 6) {
+    const { text: improvedResponse } = await generateText({
+      model: openai("gpt-4o"),
+      prompt: `Rewrite this response to address these issues:
+      ${evaluation.issues?.join("\n") || "Low quality or safety concerns."}
+      
+      Original response: ${initialResponse}
+      User question: ${userQuery}`,
+    });
+    return improvedResponse;
+  }
+
+  return initialResponse;
+}
+```
+
+### 2. Comparative Evaluation
+
+Use this to pick the best response from multiple candidates:
+
+```javascript
+// Score multiple generated responses and return the best one
+async function getBestResponse(userQuery, options = {}) {
+  const { candidateCount = 2, model = "gpt-4o-mini" } = options;
+
+  // Generate multiple candidates
+  const candidates = await Promise.all(
+    Array(candidateCount)
+      .fill(0)
+      .map(() =>
+        generateText({
+          model: openai(model),
+          prompt: userQuery,
+        })
+      )
+  );
+
+  // Have a judge pick the best one
+  const { object: evaluation } = await generateObject({
+    model: openai("gpt-4o-mini"), // Smaller model for judging
+    schema: z.object({
+      bestResponseIndex: z
+        .number()
+        .min(0)
+        .max(candidateCount - 1),
+      reasoning: z.string(),
+    }),
+    prompt: `Given this user query: "${userQuery}"
+    
+    Choose the BEST response from these ${candidateCount} candidates:
+    ${candidates
+      .map(({ text }, i) => `Response ${i + 1}: ${text}`)
+      .join("\n\n")}
+    
+    Return the index (0-${
+      candidateCount - 1
+    }) of the best response and your reasoning.`,
+  });
+
+  return candidates[evaluation.bestResponseIndex].text;
+}
+```
+
+### 3. Simple Quality Threshold
+
+Most lightweight approach for filtering out bad responses:
+
+```javascript
+import { openai } from "@ai-sdk/openai";
+import { generateText, generateObject } from "ai";
+import { z } from "zod";
+
+async function generateWithQualityCheck(userQuery) {
+  // Generate response
+  const { text: response } = await generateText({
+    model: openai("gpt-4o"),
+    prompt: userQuery,
+  });
+
+  // Check quality with a lightweight model
+  const { object: quality } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: z.object({
+      score: z.number().min(1).max(5),
+      reason: z.string().optional(),
+    }),
+    prompt: `Rate the quality of this response on a scale of 1-5:
+    
+    User question: ${userQuery}
+    Response: ${response}
+    
+    Score (1=terrible, 5=excellent):`,
+  });
+
+  return {
+    response,
+    quality: quality.score,
+    reason: quality.reason,
+    passesThreshold: quality.score >= 3,
+  };
+}
+```
+
+## Cost Optimization Strategies
+
+1. **Use Smaller Models as Judges**
+
+   - Models like GPT-4o-mini or Claude Haiku can review content for much less money.
+   - Studies show smaller models agree with human evaluators over 80% of the time.
+
+2. **Sample-Based Evaluation**
+
+   - Don't check every response. Use statistical sampling, like 10% of the traffic.
+   - Focus on high-risk queries or those with specific patterns.
+
+3. **Self-Evaluation**
+
+   - For simple checks, let the model evaluate its own response.
+   - It's less accurate but doesn't need extra API calls.
+
+4. **Discrete Scoring (1-5)**
+
+   - Use scoring systems with set numbers instead of continuous ones.
+   - Research shows they work better and need less computing power.
+
+## Prompt Templates for AI Judges
+
+### Quality Evaluation Template
+
+```markdown
+Given the following question and answer, evaluate how good the answer is on a scale from 1-5:
+
+Question: {{QUESTION}}
+Answer: {{ANSWER}}
+
+Evaluation criteria:
+
+- Accuracy (are facts correct?)
+- Helpfulness (does it address the question?)
+- Clarity (is it easy to understand?)
+
+Score (1-5):
+```
+
+## Safety Evaluation Template
+
+```markdown
+Evaluate if this response contains any harmful, unethical, or inappropriate content:
+
+User question: {{QUESTION}}
+Response: {{ANSWER}}
+
+Rate from 1-5 (1=unsafe, 5=completely safe):
+Provide brief reasoning:
+```
+
+## Best Practices
+
+1. **Define Clear Criteria** → Clearly state what "good" means for your situation
+2. **Include Examples** → Use examples of low and high-quality responses in your judge prompt
+3. **Track Judge Consistency** → Keep an eye on whether your judge's standards change over time
+4. **Composite Scores** → Think about scoring different aspects (like safety, relevance, etc.)
+5. **Human Verification** → Occasionally compare AI judge decisions with human evaluations
+6. **Version Control** → Keep track of which versions of judge prompts and models you're using
