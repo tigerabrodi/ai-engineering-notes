@@ -414,3 +414,111 @@ Provide brief reasoning:
 4. **Composite Scores** → Think about scoring different aspects (like safety, relevance, etc.)
 5. **Human Verification** → Occasionally compare AI judge decisions with human evaluations
 6. **Version Control** → Keep track of which versions of judge prompts and models you're using
+
+# AI as a Judge: Key Points
+
+**Basic Concept:**
+
+- Using AI models to evaluate outputs from other AI models
+- Typically involves prompting an evaluation model to rate or compare responses
+- Can assess subjective qualities like helpfulness, coherence, and accuracy
+
+**Benefits:**
+
+- Scales better than human evaluation
+- More nuanced than traditional metrics
+- Can evaluate open-ended or creative tasks
+- Provides detailed feedback, not just scores
+
+**Common Approaches:**
+
+1. **Single-output evaluation**: Judge model rates one response at a time
+2. **Comparative evaluation**: Judge model compares two or more responses
+3. **Criteria-based evaluation**: Scoring across multiple dimensions (accuracy, clarity, etc.)
+
+**Mitigating Biases:**
+
+- Use multiple judge models with different architectures
+- Employ randomization in presentation order
+- Create clear, consistent evaluation rubrics
+- Balance AI judgment with traditional metrics
+- Calibrate with some human evaluations
+
+**Specialized Evaluation Models:**
+
+- Models like PandaLM specifically trained for evaluation
+- Fine-tuned on human preferences and judgments
+- Often more reliable than using general models as judges
+
+**Best Practices:**
+
+- Provide clear evaluation criteria in prompts
+- Include relevant context and reference information
+- Use consistent prompting patterns
+- Validate AI judgments against human evaluations periodically
+- Be aware of limitations (can't evaluate factuality without references)
+
+# Comparative Evaluation for Model Ranking - Notes
+
+## Core Concept
+
+Comparative evaluation directly compares outputs from different models on the same inputs to determine which performs better, rather than scoring each individually.
+
+## Process
+
+1. Send identical prompts to multiple models
+2. Present pairs of responses to judges (human or AI)
+3. Judges select which response is better (sometimes with explanations)
+4. Aggregate results to establish a ranking
+
+## Key Advantages
+
+- More intuitive than absolute scoring (easier to say which is better than how good something is)
+- Better for subjective qualities hard to measure with metrics
+- Avoids calibration issues with absolute scoring
+- More aligned with how humans naturally evaluate quality
+
+## Major Challenges
+
+### Scalability
+
+- Combinatorial explosion: For N models, requires N(N-1)/2 pairwise comparisons
+- Resource intensive for large model sets
+- Time-consuming to gather sufficient judgments
+
+### Consistency
+
+- Different judges evaluate different prompts
+- Judge preferences and criteria may vary
+- Prompt selection can inadvertently favor certain models
+
+### Statistical Issues
+
+- Position bias (order of presentation affects judgment)
+- Possible intransitivity in preferences
+- Need sufficient samples for statistical significance
+
+## Practical Solutions
+
+- Tournament structures instead of all-pairs comparisons
+- Adaptive sampling focusing on closely-ranked models
+- Standardized prompt sets for benchmarking
+- Statistical methods like Elo ratings or Bradley-Terry models
+- Using AI judges to scale evaluation
+
+## Best Practices
+
+- Randomize presentation order
+- Use diverse prompts covering various capabilities
+- Establish clear evaluation criteria
+- Include multiple judges
+- Combine with other evaluation approaches
+
+## Applications
+
+- Model selection for specific use cases
+- Identifying strengths/weaknesses of different models
+- Guiding model development
+- Benchmarking new models against established ones
+
+Comparative evaluation has become an industry standard practice for model assessment, particularly for language models where subjective qualities like helpfulness and coherence are important.
