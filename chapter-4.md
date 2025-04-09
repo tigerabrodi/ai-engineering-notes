@@ -227,3 +227,80 @@ For practical implementation, you'll typically need to:
    - This final validation ensures the model works as expected in production conditions.
 
 This iterative approach is efficient because you start with broad filters that are easy to apply and progressively narrow down your options with increasingly specific and resource-intensive evaluation methods. It helps you avoid wasting time on detailed evaluations of models that wouldn't meet your basic requirements anyway.
+
+# Designing your evaluation pipeline
+
+## Step 1: Evaluating All Components
+
+The author distinguishes between two types of system evaluation:
+
+- **Turn-based evaluation**: Assesses individual interactions or responses. This is useful for conversational AI or single-query systems where each response is independent.
+
+- **Task-based evaluation**: Evaluates the entire sequence of interactions needed to complete a task. This is critical for agent-based systems or multi-step processes where success depends on the cumulative performance across turns.
+
+This distinction is important because you might have a system that gives good individual responses but fails to solve the overall task effectively. By evaluating both levels, you get a more complete picture of system performance.
+
+## Step 2: Creating Evaluation Guidelines
+
+This step involves establishing clear standards for what constitutes good and bad responses:
+
+- **Defining evaluation criteria**: For a customer support AI, criteria like relevance, factual consistency, and safety make sense. Other applications might prioritize creativity, problem-solving ability, or code correctness.
+
+- **Creating scoring rubrics**: These provide concrete examples of what constitutes a 1/5 vs 5/5 response for each criterion. This makes evaluation more consistent and less subjective.
+
+- **Understanding business impact thresholds**: The author's point about percentage improvements having non-linear business impacts is crucial. Moving from 90% to 97% factual accuracy might seem incremental but could be the difference between requiring human supervision and full automation.
+
+The business impact analysis helps you:
+
+1. Set appropriate performance targets
+2. Allocate resources more effectively (where improvement matters most)
+3. Make better decisions about when a model is "good enough" for deployment
+4. Plan development milestones that align with business outcomes
+
+For example, if you discover that hitting 95% on a particular metric allows you to automate a process entirely, that becomes a clear target rather than endlessly pursuing marginal improvements.
+
+## Step 3: Selection evaluation methods and data
+
+**Logprobs (Log Probabilities)**
+These are numerical values that show how confident a model is in each token (word/character) it generates. Higher logprobs mean higher confidence. They're useful because:
+
+- You can identify when a model is uncertain
+- They help detect potential hallucinations (model tends to be less confident when making things up)
+- They provide quantitative data for evaluation without needing external judges
+
+**Annotation**
+Annotation means adding labels, scores, or metadata to your evaluation data. For example:
+
+- Marking responses as "correct" or "incorrect"
+- Rating responses on a scale (1-5) for different criteria
+- Adding notes about why something succeeded or failed
+- Categorizing errors by type
+
+Annotated evaluation data gives you a gold standard to compare model outputs against. You might create this by having experts label a set of example inputs and ideal outputs.
+
+**Evaluating the Evaluation Pipeline**
+The author makes a great point that your evaluation system itself needs assessment:
+
+1. **Reliability**: Do you get consistent results when running the same evaluation multiple times?
+
+2. **Signal quality**: Is your evaluation actually measuring what matters for your application?
+
+3. **Redundancy**: If two metrics are highly correlated (they always move together), you might only need one of them.
+
+4. **Cost-benefit analysis**: Evaluation adds overhead in terms of:
+
+   - Computation costs
+   - Latency (especially important for real-time applications)
+   - Development time
+
+5. **Iterative improvement**: Your evaluation system should evolve as you learn more about:
+   - Which metrics best predict user satisfaction
+   - Where models typically fail in your domain
+   - New evaluation techniques that become available
+
+The key insight is that evaluation isn't just something you do once at the beginning - it's an ongoing process that includes both:
+
+- Pre-deployment testing with controlled data
+- Production monitoring with real user interactions
+
+Good experiment tracking ensures you can compare results over time and understand if your changes are actually improvements.
